@@ -120,6 +120,12 @@ a { color: var(--accent); text-decoration: none; }
 .hero { padding: 12px 4px 26px; }
 .hero-greet { font-size: 2.1rem; font-weight: 800; letter-spacing: 0.5px; }
 .hero-date { color: var(--sub); font-size: 0.92rem; margin-top: 6px; }
+.hero-weather {
+  margin-top: 10px; font-size: 0.85rem; color: var(--sub);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.hero-weather .wx-city { color: var(--muted); font-weight: 600; }
+.hero-weather .wx-temp { color: var(--text); font-weight: 800; }
 .hero-poem {
   margin-top: 16px; padding: 16px 20px;
   background: linear-gradient(135deg, var(--accent-soft), rgba(255, 107, 10, 0.06));
@@ -206,6 +212,13 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
   min-width: 32px; min-height: 32px; transition: all 0.18s;
 }
 .del-btn:hover { color: var(--red); background: var(--red-soft); }
+.edit-btn {
+  background: transparent; border: none; color: var(--muted);
+  cursor: pointer; padding: 6px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 32px; min-height: 32px; transition: all 0.18s;
+}
+.edit-btn:hover { color: var(--accent); background: var(--accent-soft); }
 
 .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 7px; font-size: 0.68rem; font-weight: 700; }
 .tag-p0 { background: var(--red-soft); color: var(--red); }
@@ -262,6 +275,7 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
 .heat-2 { background: rgba(255, 159, 10, 0.45); }
 .heat-3 { background: rgba(255, 159, 10, 0.7); color: #0A0A0A; }
 .heat-4 { background: var(--accent); color: #0A0A0A; font-weight: 700; }
+.heat-cell.today { box-shadow: 0 0 0 2px var(--accent) inset; }
 .heat-legend { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 0.72rem; color: var(--muted); }
 .heat-legend .lg { width: 14px; height: 14px; border-radius: 4px; }
 
@@ -272,6 +286,8 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
   border: 1px solid transparent;
 }
 .note-card:hover { border-color: var(--card-3); }
+.note-card.pinned { border-color: rgba(255, 159, 10, 0.45); background: rgba(255, 159, 10, 0.06); }
+.pin-mark { font-size: 0.8rem; margin-right: 5px; }
 .note-title { font-size: 0.95rem; font-weight: 700; }
 .note-preview {
   font-size: 0.82rem; color: var(--sub); margin-top: 6px; line-height: 1.7;
@@ -300,6 +316,10 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
 .bm-url { font-size: 0.66rem; color: var(--muted); margin-top: 2px; word-break: break-all; }
 .bm-del { position: absolute; top: 4px; right: 4px; opacity: 0; min-width: 26px; min-height: 26px; padding: 3px; }
 .bm-card:hover .bm-del { opacity: 1; }
+/* 触屏设备没有 hover，删除按钮常显，否则手机上永远点不到 */
+@media (hover: none) {
+  .bm-del { opacity: 1; background: rgba(10, 10, 10, 0.55); border-radius: 50%; }
+}
 
 /* ===== 记账 ===== */
 .summary-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
@@ -422,6 +442,50 @@ ul.detail-list { padding-left: 20px; }
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
+/* ===== 专注番茄钟 ===== */
+.focus-wrap {
+  position: relative; width: 230px; max-width: 70vw; margin: 8px auto 16px;
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+}
+.focus-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.focus-ring .ring-bg { fill: none; stroke: var(--card-3); stroke-width: 8; }
+.focus-ring .ring-fg { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.4s linear; }
+.focus-time { font-size: 2.5rem; font-weight: 800; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
+.focus-state { font-size: 0.76rem; color: var(--muted); margin-top: 6px; text-align: center; }
+.focus-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ===== 课表 ===== */
+.tt-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+.tt-hint { display: none; font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; }
+.tt { display: grid; grid-template-columns: 72px repeat(7, minmax(86px, 1fr)); gap: 6px; min-width: 700px; }
+.tt-head { font-size: 0.72rem; color: var(--muted); text-align: center; padding: 6px 0; font-weight: 700; }
+.tt-head.today { color: var(--accent); }
+.tt-time { font-size: 0.68rem; color: var(--muted); display: flex; flex-direction: column; justify-content: center; gap: 2px; line-height: 1.35; }
+.tt-time.now { color: var(--accent); font-weight: 700; }
+.tt-cell {
+  min-height: 56px; border-radius: 10px; background: var(--card-2);
+  border: 1px solid transparent; padding: 6px; font-size: 0.72rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.tt-cell:hover { border-color: var(--card-3); }
+.tt-cell.today-col { background: rgba(255, 159, 10, 0.05); }
+.tt-cell.has-course { background: var(--accent-soft); border-color: rgba(255, 159, 10, 0.28); }
+.tt-cell.inactive { opacity: 0.4; border-style: dashed; border-color: var(--card-3); }
+.tt-cell.now-row { background: rgba(255, 159, 10, 0.07); }
+.tt-course-name { font-weight: 700; font-size: 0.76rem; line-height: 1.35; word-break: break-all; }
+.tt-course-room { color: var(--sub); font-size: 0.66rem; margin-top: 3px; }
+.tt-course-week { color: var(--muted); font-size: 0.62rem; margin-top: 2px; }
+.slot-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.slot-row input[type="time"] { width: auto; padding: 6px 8px; font-size: 0.8rem; }
+
+/* ===== 每周复盘 ===== */
+.review-text {
+  white-space: pre-wrap; font-family: inherit; font-size: 0.88rem;
+  line-height: 1.95; color: var(--sub); background: var(--card-2);
+  border-radius: var(--radius-sm); padding: 16px; margin-bottom: 14px;
+}
+
+#pcNav { overflow-y: auto; flex: 1; }
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
   .sidebar { display: none; }
@@ -437,6 +501,7 @@ ul.detail-list { padding-left: 20px; }
   .btn-sm { width: auto; }
   .bottom-nav { display: flex; }
   .modal { padding: 22px 18px; }
+  .tt-hint { display: block; }
 }
 </style>
 </head>
@@ -489,6 +554,7 @@ ul.detail-list { padding-left: 20px; }
         <div class="hero">
           <div class="hero-greet" id="heroGreet">你好</div>
           <div class="hero-date" id="heroDate"></div>
+          <div class="hero-weather" id="heroWeather"></div>
           <div class="hero-poem" id="heroPoem"></div>
         </div>
 
@@ -597,6 +663,7 @@ ul.detail-list { padding-left: 20px; }
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             任务清单
           </div>
+          <input type="text" id="taskSearch" placeholder="搜索任务内容或分类…" oninput="renderTasks()" style="margin-bottom:10px">
           <div class="filter-bar" id="taskFilters">
             <button class="filter-chip active" data-filter="all">全部</button>
             <button class="filter-chip" data-filter="pending">未完成</button>
@@ -669,7 +736,8 @@ ul.detail-list { padding-left: 20px; }
             笔记灵感
             <span class="right"><button class="btn btn-accent btn-sm" onclick="openNoteEditor()">写一条</button></span>
           </div>
-          <input type="text" id="noteSearch" placeholder="搜索标题、内容或标签…" oninput="renderNotes()" style="margin-bottom:14px">
+          <input type="text" id="noteSearch" placeholder="搜索标题、内容或标签…" oninput="renderNotes()" style="margin-bottom:10px">
+          <div class="filter-bar" id="noteTagFilter" style="margin-bottom:14px"></div>
           <div id="noteList"></div>
         </div>
       </div>
@@ -759,13 +827,18 @@ ul.detail-list { padding-left: 20px; }
         <div class="card">
           <div class="card-title">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#30D158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-            本月概览
-            <span class="right"><button class="btn btn-ghost btn-sm" onclick="exportCSV()">导出 CSV</button></span>
+            月度概览
+            <span class="right">
+              <button class="btn btn-ghost btn-sm" onclick="shiftMonth(-1)" aria-label="上个月">‹</button>
+              <span id="monthLabel" style="font-size:0.78rem;color:var(--sub);font-weight:700;min-width:82px;display:inline-block;text-align:center">本月</span>
+              <button class="btn btn-ghost btn-sm" id="monthNextBtn" onclick="shiftMonth(1)" aria-label="下个月">›</button>
+              <button class="btn btn-ghost btn-sm" onclick="exportCSV()">导出 CSV</button>
+            </span>
           </div>
           <div class="summary-row">
-            <div class="sum-card"><div class="sum-label">本月支出</div><div class="sum-val expense" id="mExpense">¥0</div></div>
-            <div class="sum-card"><div class="sum-label">本月收入</div><div class="sum-val income" id="mIncome">¥0</div></div>
-            <div class="sum-card"><div class="sum-label">本月结余</div><div class="sum-val" id="mBalance">¥0</div></div>
+            <div class="sum-card"><div class="sum-label" id="lblExpense">本月支出</div><div class="sum-val expense" id="mExpense">¥0</div></div>
+            <div class="sum-card"><div class="sum-label" id="lblIncome">本月收入</div><div class="sum-val income" id="mIncome">¥0</div></div>
+            <div class="sum-card"><div class="sum-label">结余</div><div class="sum-val" id="mBalance">¥0</div></div>
           </div>
           <div class="budget-label"><span>月预算执行</span><span id="budgetText">¥0 / ¥3000</span></div>
           <div class="budget-bar-wrap"><div class="budget-bar" id="budgetBar" style="width:0%"></div></div>
@@ -856,6 +929,111 @@ ul.detail-list { padding-left: 20px; }
         </div>
       </div>
 
+      <!-- ===== 专注番茄钟 ===== -->
+      <div class="tab-content" id="tab-focus" style="display:none">
+        <div class="card">
+          <div class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 15 14"/></svg>
+            专注计时器
+          </div>
+          <div class="focus-wrap">
+            <svg class="focus-ring" viewBox="0 0 200 200" aria-hidden="true">
+              <circle class="ring-bg" cx="100" cy="100" r="88"></circle>
+              <circle class="ring-fg" id="focusRing" cx="100" cy="100" r="88" stroke-dasharray="552.9" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="focus-inner">
+              <div class="focus-time" id="focusTime">25:00</div>
+              <div class="focus-state" id="focusState">准备好就点开始</div>
+            </div>
+          </div>
+          <div class="focus-btns">
+            <button class="btn btn-accent" id="focusMainBtn" onclick="focusMainClick()">开始专注</button>
+            <button class="btn btn-ghost" onclick="stopFocus()">结束本次</button>
+          </div>
+          <div class="form-row" style="margin-top:16px">
+            <div class="form-group">
+              <label>单次时长（分钟）</label>
+              <input type="number" id="focusDurationInput" min="1" max="180" step="1" value="25">
+            </div>
+            <div class="form-group" style="justify-content:flex-end">
+              <button class="btn btn-ghost" onclick="saveFocusDuration()">保存时长</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            专注统计
+          </div>
+          <div class="summary-row">
+            <div class="sum-card"><div class="sum-label">今日</div><div class="sum-val" style="color:var(--accent)" id="focusToday">0 分钟</div></div>
+            <div class="sum-card"><div class="sum-label">本周</div><div class="sum-val" style="color:var(--blue)" id="focusWeek">0 分钟</div></div>
+            <div class="sum-card"><div class="sum-label">累计次数</div><div class="sum-val" id="focusCount">0</div></div>
+          </div>
+          <div id="focusList"></div>
+        </div>
+      </div>
+
+      <!-- ===== 课表 ===== -->
+      <div class="tab-content" id="tab-timetable" style="display:none">
+        <div class="card">
+          <div class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            我的课表
+            <span class="right">
+              <button class="btn btn-ghost btn-sm" onclick="fillDefaultSlots()">生成默认节次</button>
+              <button class="btn btn-accent btn-sm" onclick="openCourseEditor(-1, -1)">添加课程</button>
+            </span>
+          </div>
+          <div class="tt-hint">左右滑动查看整周 →</div>
+          <div class="tt-wrap"><div class="tt" id="timetableGrid"></div></div>
+          <div class="chart-caption" id="ttTip"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>
+            节次时间
+          </div>
+          <div id="slotList"></div>
+        </div>
+      </div>
+
+      <!-- ===== 每周复盘 ===== -->
+      <div class="tab-content" id="tab-review" style="display:none">
+        <div class="card">
+          <div class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#BF5AF2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            每周复盘
+            <span class="right">
+              <button class="btn btn-ghost btn-sm" onclick="shiftReviewWeek(-1)" aria-label="上一周">‹</button>
+              <span id="reviewWeekLabel" style="font-size:0.78rem;color:var(--sub);font-weight:700;min-width:120px;display:inline-block;text-align:center">本周</span>
+              <button class="btn btn-ghost btn-sm" id="reviewNextBtn" onclick="shiftReviewWeek(1)" aria-label="下一周">›</button>
+            </span>
+          </div>
+          <div class="summary-row">
+            <div class="sum-card"><div class="sum-label">完成任务</div><div class="sum-val" style="color:var(--accent)" id="rvTasks">0</div></div>
+            <div class="sum-card"><div class="sum-label">打卡率</div><div class="sum-val" style="color:var(--green)" id="rvHabits">0%</div></div>
+            <div class="sum-card"><div class="sum-label">支出</div><div class="sum-val" style="color:var(--red)" id="rvExpense">¥0</div></div>
+          </div>
+          <div class="summary-row">
+            <div class="sum-card"><div class="sum-label">专注时长</div><div class="sum-val" style="color:var(--teal)" id="rvFocus">0 分钟</div></div>
+            <div class="sum-card"><div class="sum-label">新增笔记</div><div class="sum-val" style="color:var(--purple)" id="rvNotes">0</div></div>
+            <div class="sum-card"><div class="sum-label">完成率</div><div class="sum-val" style="color:var(--sub)" id="rvRate">0%</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#BF5AF2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            一句话小结
+          </div>
+          <pre class="review-text" id="reviewText"></pre>
+          <button class="btn btn-accent" onclick="copyReviewText()">复制小结</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -926,6 +1104,12 @@ ul.detail-list { padding-left: 20px; }
         <label>目标体重 (kg)</label>
         <input type="number" id="setGoalWeight" min="30" max="200" step="0.5">
       </div>
+    </div>
+    <div class="form-row" style="margin-bottom:0">
+      <div class="form-group" style="flex:2">
+        <label>天气城市（城市名或拼音，如 雅安 / Ya'an）</label>
+        <input type="text" id="setWeatherCity" placeholder="留空则不显示天气" maxlength="20">
+      </div>
       <div class="form-group" style="justify-content:flex-end">
         <button class="btn btn-ghost" type="button" onclick="savePrefs()">保存偏好</button>
       </div>
@@ -948,6 +1132,162 @@ ul.detail-list { padding-left: 20px; }
 </div>
 
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+
+<!-- ===== 课程编辑弹窗 ===== -->
+<div class="modal-mask" id="courseModal">
+  <div class="modal">
+    <h3 id="courseModalTitle">添加课程</h3>
+    <div class="form-group" style="margin-bottom:10px">
+      <label>课程名</label>
+      <input type="text" id="courseName" placeholder="例如：高等数学 A" maxlength="40">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>星期</label>
+        <select id="courseDay">
+          <option value="0">周一</option>
+          <option value="1">周二</option>
+          <option value="2">周三</option>
+          <option value="3">周四</option>
+          <option value="4">周五</option>
+          <option value="5">周六</option>
+          <option value="6">周日</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>节次</label>
+        <select id="courseSlot"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>教室（选填）</label>
+        <input type="text" id="courseRoom" placeholder="例如：四教 302" maxlength="30">
+      </div>
+      <div class="form-group">
+        <label>上课周</label>
+        <select id="courseWeek">
+          <option value="all">每周</option>
+          <option value="odd">单周</option>
+          <option value="even">双周</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger-ghost" id="courseDeleteBtn" style="display:none">删除</button>
+      <button class="btn btn-ghost" onclick="closeCourseEditor()">取消</button>
+      <button class="btn btn-accent" onclick="saveCourseEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 任务编辑弹窗 ===== -->
+<div class="modal-mask" id="taskEditModal">
+  <div class="modal">
+    <h3>编辑任务</h3>
+    <div class="form-group" style="margin-bottom:10px">
+      <label>任务内容</label>
+      <input type="text" id="taskEditTitle" maxlength="100">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>分类</label>
+        <select id="taskEditCategory">
+          <option value="学习">学习</option>
+          <option value="创作">创作</option>
+          <option value="生活">生活</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>优先级</label>
+        <select id="taskEditPriority">
+          <option value="P0">P0 紧急</option>
+          <option value="P1">P1 重要</option>
+          <option value="P2">P2 普通</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>截止日期</label>
+        <input type="date" id="taskEditDue">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeTaskEditor()">取消</button>
+      <button class="btn btn-accent" onclick="saveTaskEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 习惯编辑弹窗 ===== -->
+<div class="modal-mask" id="habitEditModal">
+  <div class="modal">
+    <h3>编辑习惯</h3>
+    <div class="form-group" style="margin-bottom:10px">
+      <label>习惯名称</label>
+      <input type="text" id="habitEditName" maxlength="30">
+    </div>
+    <div class="form-group">
+      <label>颜色</label>
+      <select id="habitEditColor">
+        <option value="#FF9F0A">橙色</option>
+        <option value="#0A84FF">蓝色</option>
+        <option value="#30D158">绿色</option>
+        <option value="#FF453A">红色</option>
+        <option value="#BF5AF2">紫色</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeHabitEditor()">取消</button>
+      <button class="btn btn-accent" onclick="saveHabitEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 流水编辑弹窗 ===== -->
+<div class="modal-mask" id="txnEditModal">
+  <div class="modal">
+    <h3>编辑这笔记录</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>类型</label>
+        <select id="txnEditType">
+          <option value="expense">支出</option>
+          <option value="income">收入</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>分类</label>
+        <select id="txnEditCategory">
+          <option value="餐饮">餐饮</option>
+          <option value="交通">交通</option>
+          <option value="购物">购物</option>
+          <option value="学习">学习</option>
+          <option value="健身">健身</option>
+          <option value="副业收入">副业收入</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>金额 (¥)</label>
+        <input type="number" id="txnEditAmount" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>日期</label>
+        <input type="date" id="txnEditDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>备注（选填）</label>
+      <input type="text" id="txnEditNote" maxlength="50">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeTxnEditor()">取消</button>
+      <button class="btn btn-accent" onclick="saveTxnEdit()">保存</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== 笔记编辑弹窗 ===== -->
 <div class="modal-mask" id="noteModal">
@@ -975,7 +1315,7 @@ ul.detail-list { padding-left: 20px; }
 <!-- ===== 菜谱编辑弹窗 ===== -->
 <div class="modal-mask" id="recipeModal">
   <div class="modal wide">
-    <h3>加一道菜</h3>
+    <h3 id="recipeModalTitle">加一道菜</h3>
     <div class="form-row">
       <div class="form-group" style="flex:2">
         <label>菜名</label>
@@ -1031,6 +1371,7 @@ ul.detail-list { padding-left: 20px; }
     </div>
     <div class="modal-actions">
       <button class="btn btn-danger-ghost" id="rdDeleteBtn">删除这道菜</button>
+      <button class="btn btn-accent" onclick="editDetailRecipe()">编辑</button>
       <button class="btn btn-ghost" onclick="closeRecipeDetail()">关闭</button>
     </div>
   </div>
@@ -1058,24 +1399,43 @@ function defaultState() {
   return {
     tasks: [], habits: [], weights: [], txns: [],
     bookmarks: [], notes: [], recipes: [],
+    timetable: { slots: [], courses: [] }, // 课表：节次 + 课程
+    focusSessions: [], focusDuration: 25,  // 番茄钟：专注记录 + 单次时长
+    weatherCity: '', weatherLat: null, weatherLng: null,
     budget: 3000, goalWeight: 62, inited: false
   };
+}
+// 把外部数据（本地/云端/导入）洗成合法结构，防止坏数据把页面弄白
+function normalizeState(s) {
+  var base = defaultState();
+  if (!s || typeof s !== 'object') return base;
+  for (var k in base) { if (s[k] !== undefined) base[k] = s[k]; }
+  ['tasks', 'habits', 'weights', 'txns', 'bookmarks', 'notes', 'recipes', 'focusSessions'].forEach(function(k) {
+    if (!Array.isArray(base[k])) base[k] = [];
+  });
+  if (!base.timetable || typeof base.timetable !== 'object') base.timetable = { slots: [], courses: [] };
+  if (!Array.isArray(base.timetable.slots)) base.timetable.slots = [];
+  if (!Array.isArray(base.timetable.courses)) base.timetable.courses = [];
+  var fd = parseInt(base.focusDuration, 10);
+  base.focusDuration = (fd >= 1 && fd <= 180) ? fd : 25;
+  var b = parseFloat(base.budget);
+  base.budget = (b >= 100) ? b : 3000;
+  return base;
 }
 function loadState() {
   try {
     var raw = localStorage.getItem(STORE_KEY);
-    if (raw) {
-      var parsed = JSON.parse(raw);
-      var base = defaultState();
-      for (var k in base) { if (parsed[k] !== undefined) base[k] = parsed[k]; }
-      return base;
-    }
+    if (raw) return normalizeState(JSON.parse(raw));
   } catch (e) { /* 数据损坏时回退默认值 */ }
   return defaultState();
 }
 function saveState() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { showToast('本地存储空间不足'); }
-  schedulePush();
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    schedulePush(); // 只有真正落盘成功才推云，避免把没存下来的残缺数据传上去
+  } catch (e) {
+    showToast('本地存储失败，本次改动不会同步到云端');
+  }
 }
 
 /* ================= 加密（Web Crypto: PBKDF2 + AES-GCM） ================= */
@@ -1184,9 +1544,7 @@ function cloudPull() {
       var rec = JSON.parse(plain);
       var last = Number(localStorage.getItem(SYNC_KEYS.lastpush) || 0);
       if (rec && rec.ts && rec.ts > last && rec.data) {
-        var base = defaultState();
-        for (var k in base) { if (rec.data[k] !== undefined) base[k] = rec.data[k]; }
-        state = base;
+        state = normalizeState(rec.data);
         try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
         localStorage.setItem(SYNC_KEYS.lastpush, String(rec.ts));
         setSyncStatus('synced');
@@ -1204,6 +1562,7 @@ function openSettings() {
   $('syncPass').value = SYNC.pass;
   $('setBudget').value = state.budget;
   $('setGoalWeight').value = state.goalWeight;
+  $('setWeatherCity').value = state.weatherCity || '';
   $('syncStatusLine').style.display = 'none';
   $('settingsModal').classList.add('show');
 }
@@ -1258,8 +1617,19 @@ function savePrefs() {
   var g = parseFloat($('setGoalWeight').value);
   if (b && b >= 100) state.budget = b;
   if (g && g >= 30 && g <= 200) state.goalWeight = g;
+  var cityInput = $('setWeatherCity');
+  if (cityInput) {
+    var city = cityInput.value.trim();
+    if (city !== state.weatherCity) {
+      state.weatherCity = city;
+      state.weatherLat = null; // 城市变了，坐标作废，下次重新解析
+      state.weatherLng = null;
+      try { localStorage.removeItem(WEATHER_KEY); } catch (e) {}
+    }
+  }
   saveState();
   renderAll();
+  refreshWeather();
   showToast('偏好已保存');
 }
 
@@ -1374,14 +1744,17 @@ var TABS = [
   { id: 'dashboard', name: '看板', icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' },
   { id: 'tasks', name: '任务', icon: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>' },
   { id: 'habits', name: '习惯', icon: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
+  { id: 'focus', name: '专注', icon: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 15 14"/>' },
+  { id: 'timetable', name: '课表', icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
   { id: 'notes', name: '笔记', icon: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>' },
   { id: 'bookmarks', name: '书签', icon: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>' },
   { id: 'finance', name: '记账', icon: '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>' },
   { id: 'fitness', name: '健身', icon: '<path d="M6.5 6.5h11a5 5 0 0 1 0 11h-11a5 5 0 0 1 0-11z"/><path d="M3 9v6"/><path d="M21 9v6"/>' },
-  { id: 'recipes', name: '菜谱', icon: '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>' }
+  { id: 'recipes', name: '菜谱', icon: '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>' },
+  { id: 'review', name: '复盘', icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/>' }
 ];
 var MOBILE_MAIN = ['dashboard', 'tasks', 'habits', 'finance'];
-var MOBILE_MORE = ['notes', 'bookmarks', 'fitness', 'recipes'];
+var MOBILE_MORE = ['focus', 'timetable', 'notes', 'bookmarks', 'fitness', 'recipes', 'review'];
 var currentTab = 'dashboard';
 
 function svgIcon(paths, size) {
@@ -1401,13 +1774,20 @@ function buildNav() {
   }).join('');
 }
 function switchTab(tab) {
+  if (!$('tab-' + tab)) tab = 'dashboard'; // 白名单：不存在的 tab 一律回看板
   currentTab = tab;
   document.querySelectorAll('.tab-content').forEach(function(el) { el.style.display = 'none'; });
   var el = $('tab-' + tab);
   if (el) el.style.display = 'block';
   document.querySelectorAll('#pcNav .nav-item').forEach(function(b) { b.classList.toggle('active', b.dataset.tab === tab); });
   document.querySelectorAll('#mobileNav .bnav-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.tab === tab); });
+  if (location.hash !== '#' + tab) {
+    try { history.replaceState(null, '', '#' + tab); } catch (e) { location.hash = tab; }
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  checkDayRollover();
+  // 课表的「当前节」高亮依赖时间，切进来时重算一次
+  if (tab === 'timetable' && state) renderTimetable();
 }
 function openSheet() { $('sheetMask').classList.add('show'); $('moreSheet').classList.add('show'); }
 function closeSheet() { $('sheetMask').classList.remove('show'); $('moreSheet').classList.remove('show'); }
@@ -1424,6 +1804,10 @@ function renderAll() {
   renderFinance();
   renderWeight();
   renderRecipes();
+  renderFocus();
+  renderTimetable();
+  renderReview();
+  renderWeather();
 }
 
 /* ================= 看板 ================= */
@@ -1537,8 +1921,37 @@ function toggleTask(id) {
   var t = state.tasks.find(function(x) { return x.id === id; });
   if (!t) return;
   t.completed = !t.completed;
+  // 完成日期供「每周复盘」统计，取消完成时清掉
+  if (t.completed) t.completedAt = todayStr();
+  else delete t.completedAt;
   saveState();
   renderAll();
+}
+var editingTaskId = null;
+function openTaskEditor(id) {
+  var t = state.tasks.find(function(x) { return x.id === id; });
+  if (!t) return;
+  editingTaskId = id;
+  $('taskEditTitle').value = t.title || '';
+  $('taskEditCategory').value = t.category || '生活';
+  $('taskEditPriority').value = t.priority || 'P1';
+  $('taskEditDue').value = t.due || todayStr();
+  $('taskEditModal').classList.add('show');
+}
+function closeTaskEditor() { $('taskEditModal').classList.remove('show'); editingTaskId = null; }
+function saveTaskEdit() {
+  var t = state.tasks.find(function(x) { return x.id === editingTaskId; });
+  if (!t) { closeTaskEditor(); return; }
+  var title = $('taskEditTitle').value.trim();
+  if (!title) return showToast('任务内容不能为空');
+  t.title = title;
+  t.category = $('taskEditCategory').value;
+  t.priority = $('taskEditPriority').value;
+  t.due = $('taskEditDue').value || t.due;
+  saveState();
+  closeTaskEditor();
+  renderAll();
+  showToast('任务已更新');
 }
 function deleteTask(id) {
   state.tasks = state.tasks.filter(function(x) { return x.id !== id; });
@@ -1552,7 +1965,14 @@ function renderTasks() {
   if (currentFilter === 'pending') filtered = state.tasks.filter(function(t) { return !t.completed; });
   else if (currentFilter === 'completed') filtered = state.tasks.filter(function(t) { return t.completed; });
   else if (['学习', '创作', '生活'].indexOf(currentFilter) >= 0) filtered = state.tasks.filter(function(t) { return t.category === currentFilter; });
-  if (filtered.length === 0) { list.innerHTML = '<div class="empty-tip">暂无任务，添加一条试试</div>'; return; }
+  var searchEl = $('taskSearch');
+  var kw = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  if (kw) {
+    filtered = filtered.filter(function(t) {
+      return ((t.title || '') + ' ' + (t.category || '')).toLowerCase().indexOf(kw) >= 0;
+    });
+  }
+  if (filtered.length === 0) { list.innerHTML = '<div class="empty-tip">' + (kw ? '没有匹配的任务' : '暂无任务，添加一条试试') + '</div>'; return; }
   var today = todayStr();
   var pOrder = { P0: 0, P1: 1, P2: 2 };
   filtered = filtered.slice().sort(function(a, b) {
@@ -1574,6 +1994,7 @@ function renderTasks() {
       + '<div class="row-info"><div class="row-title">' + esc(t.title) + '</div>'
       + '<div class="row-meta"><span class="tag tag-' + (t.priority || 'P2').toLowerCase() + '">' + (t.priority || 'P2') + '</span>'
       + '<span class="tag tag-cat">' + esc(t.category || '生活') + '</span>' + dueTxt + '</div></div>'
+      + '<button class="edit-btn" onclick="openTaskEditor(' + t.id + ')" aria-label="编辑">' + svgIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>', 15) + '</button>'
       + '<button class="del-btn" onclick="deleteTask(' + t.id + ')" aria-label="删除">' + svgIcon('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>', 15) + '</button>'
       + '</div>';
   }).join('');
@@ -1589,11 +2010,39 @@ function addHabit() {
   renderHabits(); renderHeatmap(); renderDashboard();
   showToast('习惯已添加');
 }
+var HABIT_COLORS = ['#FF9F0A', '#0A84FF', '#30D158', '#FF453A', '#BF5AF2'];
 function deleteHabit(id) {
-  state.habits = state.habits.filter(function(h) { return h.id !== id; });
+  var h = state.habits.find(function(x) { return x.id === id; });
+  if (!h) return;
+  showConfirm('删除习惯', '「' + h.name + '」及它的全部打卡记录都会被删除，无法恢复。', function() {
+    state.habits = state.habits.filter(function(x) { return x.id !== id; });
+    saveState();
+    renderHabits(); renderHeatmap(); renderDashboard();
+    showToast('习惯已删除');
+  });
+}
+var editingHabitId = null;
+function openHabitEditor(id) {
+  var h = state.habits.find(function(x) { return x.id === id; });
+  if (!h) return;
+  editingHabitId = id;
+  $('habitEditName').value = h.name || '';
+  $('habitEditColor').value = HABIT_COLORS.indexOf(h.color) >= 0 ? h.color : HABIT_COLORS[0];
+  $('habitEditModal').classList.add('show');
+}
+function closeHabitEditor() { $('habitEditModal').classList.remove('show'); editingHabitId = null; }
+function saveHabitEdit() {
+  var h = state.habits.find(function(x) { return x.id === editingHabitId; });
+  if (!h) { closeHabitEditor(); return; }
+  var name = $('habitEditName').value.trim();
+  if (!name) return showToast('习惯名称不能为空');
+  h.name = name;
+  var c = $('habitEditColor').value;
+  h.color = HABIT_COLORS.indexOf(c) >= 0 ? c : HABIT_COLORS[0];
   saveState();
+  closeHabitEditor();
   renderHabits(); renderHeatmap(); renderDashboard();
-  showToast('习惯已删除');
+  showToast('习惯已更新');
 }
 function toggleHabit(id) {
   var h = state.habits.find(function(x) { return x.id === id; });
@@ -1631,6 +2080,7 @@ function renderHabits() {
       + '<div class="row-info"><div class="row-title">' + esc(h.name) + '</div>'
       + '<div class="row-meta"><span class="streak-flame">' + streak + ' 天连续</span><span>· 累计 ' + h.records.length + ' 次</span></div></div>'
       + '<button class="checkin-btn ' + (checked ? 'done' : 'can') + '" onclick="toggleHabit(' + h.id + ')">' + (checked ? '已打卡' : '打卡') + '</button>'
+      + '<button class="edit-btn" onclick="openHabitEditor(' + h.id + ')" aria-label="编辑">' + svgIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>', 15) + '</button>'
       + '<button class="del-btn" onclick="deleteHabit(' + h.id + ')" aria-label="删除">' + svgIcon('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>', 15) + '</button>'
       + '</div>';
   }).join('');
@@ -1638,9 +2088,13 @@ function renderHabits() {
 function renderHeatmap() {
   var grid = $('heatmap');
   var today = new Date();
-  var start = new Date(today);
-  start.setDate(today.getDate() - 34);
-  start.setDate(start.getDate() - start.getDay());
+  today.setHours(0, 0, 0, 0);
+  var todayKey = fmtDate(today);
+  // 终点取本周六、往前 34 天 = 5 周 35 格，保证覆盖本周整周（含今天）
+  var end = new Date(today);
+  end.setDate(today.getDate() + (6 - today.getDay()));
+  var start = new Date(end);
+  start.setDate(end.getDate() - 34);
   var html = '';
   for (var i = 0; i < 35; i++) {
     var d = new Date(start);
@@ -1650,7 +2104,8 @@ function renderHeatmap() {
     state.habits.forEach(function(h) { if (h.records.indexOf(ds) >= 0) count++; });
     var level = '';
     if (count > 0) level = count >= 4 ? 'heat-4' : count >= 3 ? 'heat-3' : count >= 2 ? 'heat-2' : 'heat-1';
-    html += '<div class="heat-cell ' + level + '" title="' + ds + ' 打卡 ' + count + ' 个习惯"' + (d > today ? ' style="opacity:0.25"' : '') + '>' + d.getDate() + '</div>';
+    var future = ds > todayKey;
+    html += '<div class="heat-cell ' + level + (ds === todayKey ? ' today' : '') + '" title="' + ds + ' 打卡 ' + count + ' 个习惯"' + (future ? ' style="opacity:0.25"' : '') + '>' + d.getDate() + '</div>';
   }
   grid.innerHTML = html;
 }
@@ -1699,26 +2154,62 @@ function deleteNote(id) {
     showToast('笔记已删除');
   });
 }
+var activeNoteTag = '';
+function setNoteTag(tag) {
+  activeNoteTag = (activeNoteTag === tag) ? '' : tag;
+  renderNotes();
+}
+function togglePin(id) {
+  var n = state.notes.find(function(x) { return x.id === id; });
+  if (!n) return;
+  n.pinned = !n.pinned;
+  saveState();
+  renderNotes();
+  showToast(n.pinned ? '已置顶' : '已取消置顶');
+}
 function renderNotes() {
   var list = $('noteList');
   var kw = ($('noteSearch').value || '').trim().toLowerCase();
-  var filtered = state.notes;
+
+  // 标签筛选条：从全部笔记里聚合标签
+  var tagBox = $('noteTagFilter');
+  var allTags = [];
+  state.notes.forEach(function(n) {
+    (n.tags || []).forEach(function(t) { if (allTags.indexOf(t) < 0) allTags.push(t); });
+  });
+  if (activeNoteTag && allTags.indexOf(activeNoteTag) < 0) activeNoteTag = '';
+  tagBox.innerHTML = allTags.length === 0 ? ''
+    : ['<button class="filter-chip' + (activeNoteTag === '' ? ' active' : '') + '" onclick="setNoteTag(\'\')">全部标签</button>']
+      .concat(allTags.map(function(t) {
+        return '<button class="filter-chip' + (activeNoteTag === t ? ' active' : '') + '" data-tag="' + esc(t) + '" onclick="setNoteTag(this.dataset.tag)">' + esc(t) + '</button>';
+      })).join('');
+
+  var filtered = state.notes.slice();
   if (kw) {
-    filtered = state.notes.filter(function(n) {
+    filtered = filtered.filter(function(n) {
       return (n.title + ' ' + n.content + ' ' + (n.tags || []).join(' ')).toLowerCase().indexOf(kw) >= 0;
     });
   }
+  if (activeNoteTag) {
+    filtered = filtered.filter(function(n) { return (n.tags || []).indexOf(activeNoteTag) >= 0; });
+  }
   if (filtered.length === 0) {
-    list.innerHTML = '<div class="empty-tip">' + (kw ? '没有匹配的笔记' : '还没有笔记，点右上角「写一条」开始') + '</div>';
+    list.innerHTML = '<div class="empty-tip">' + (kw || activeNoteTag ? '没有匹配的笔记' : '还没有笔记，点右上角「写一条」开始') + '</div>';
     return;
   }
+  // 置顶优先，其余按更新时间倒序
+  filtered.sort(function(a, b) {
+    if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+    return String(b.updated || b.created || '').localeCompare(String(a.updated || a.created || ''));
+  });
   list.innerHTML = filtered.map(function(n) {
-    return '<div class="note-card" onclick="openNoteEditor(' + n.id + ')">'
-      + '<div class="note-title">' + esc(n.title) + '</div>'
+    return '<div class="note-card' + (n.pinned ? ' pinned' : '') + '" onclick="openNoteEditor(' + n.id + ')">'
+      + '<div class="note-title">' + (n.pinned ? '<span class="pin-mark">📌</span>' : '') + esc(n.title) + '</div>'
       + '<div class="note-preview">' + esc(n.content) + '</div>'
       + '<div class="note-foot">'
       + (n.tags || []).map(function(t) { return '<span class="note-tag">' + esc(t) + '</span>'; }).join('')
       + '<span class="note-time">' + esc(n.updated || n.created) + '</span>'
+      + '<button class="edit-btn" onclick="event.stopPropagation(); togglePin(' + n.id + ')" aria-label="置顶">' + svgIcon('<path d="M12 17v5"/><path d="M9 10.76V6h6v4.76a2 2 0 0 0 .59 1.42l1.41 1.4V16H5v-2.42l1.41-1.4A2 2 0 0 0 7 10.76z"/>', 14) + '</button>'
       + '<button class="del-btn" onclick="event.stopPropagation(); deleteNote(' + n.id + ')" aria-label="删除">' + svgIcon('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>', 14) + '</button>'
       + '</div></div>';
   }).join('');
@@ -1794,24 +2285,78 @@ function addTransaction() {
   renderFinance(); renderDashboard();
   showToast((type === 'expense' ? '支出 ' : '收入 ') + '¥' + amount.toFixed(2) + ' 已记录');
 }
+/* ================= 记账 ================= */
+var financeMonth = todayStr().slice(0, 7); // 记账页当前查看的月份，看板统计始终用真实当月
+function shiftMonth(n) {
+  var parts = financeMonth.split('-');
+  var y = parseInt(parts[0], 10);
+  var m = parseInt(parts[1], 10) - 1 + n;
+  if (isNaN(y) || isNaN(m)) return;
+  var d = new Date(y, m, 1);
+  var next = fmtDate(d).slice(0, 7);
+  if (next > todayStr().slice(0, 7)) return; // 不允许翻到未来月份
+  financeMonth = next;
+  renderFinance();
+}
+function monthText(month) {
+  var parts = month.split('-');
+  return parts[0] + ' 年 ' + parseInt(parts[1], 10) + ' 月';
+}
 function deleteTransaction(id) {
   state.txns = state.txns.filter(function(t) { return t.id !== id; });
   saveState();
   renderFinance(); renderDashboard();
   showToast('记录已删除');
 }
+var editingTxnId = null;
+function openTxnEditor(id) {
+  var t = state.txns.find(function(x) { return x.id === id; });
+  if (!t) return;
+  editingTxnId = id;
+  $('txnEditType').value = t.type === 'income' ? 'income' : 'expense';
+  $('txnEditCategory').value = t.category || '其他';
+  $('txnEditAmount').value = t.amount;
+  $('txnEditDate').value = t.date || todayStr();
+  $('txnEditNote').value = t.note || '';
+  $('txnEditModal').classList.add('show');
+}
+function closeTxnEditor() { $('txnEditModal').classList.remove('show'); editingTxnId = null; }
+function saveTxnEdit() {
+  var t = state.txns.find(function(x) { return x.id === editingTxnId; });
+  if (!t) { closeTxnEditor(); return; }
+  var amount = parseFloat($('txnEditAmount').value);
+  var date = $('txnEditDate').value;
+  if (!amount || amount <= 0 || amount > 10000000) return showToast('请输入有效金额');
+  if (!date) return showToast('请选择日期');
+  t.type = $('txnEditType').value === 'income' ? 'income' : 'expense';
+  t.category = $('txnEditCategory').value;
+  t.amount = Math.round(amount * 100) / 100;
+  t.date = date;
+  t.note = $('txnEditNote').value.trim();
+  saveState();
+  closeTxnEditor();
+  renderFinance(); renderDashboard();
+  showToast('记录已更新');
+}
 function renderFinance() {
-  var month = todayStr().slice(0, 7);
-  var monthTxns = state.txns.filter(function(t) { return t.date.indexOf(month) === 0; });
+  var month = financeMonth;
+  var isCurrentMonth = month === todayStr().slice(0, 7);
+  var monthTxns = state.txns.filter(function(t) { return t.date && t.date.indexOf(month) === 0; });
   var expense = monthTxns.filter(function(t) { return t.type === 'expense'; }).reduce(function(s, t) { return s + t.amount; }, 0);
   var income = monthTxns.filter(function(t) { return t.type === 'income'; }).reduce(function(s, t) { return s + t.amount; }, 0);
+  var label = isCurrentMonth ? '本月' : monthText(month);
+  $('monthLabel').textContent = monthText(month);
+  $('lblExpense').textContent = label + '支出';
+  $('lblIncome').textContent = label + '收入';
+  var nextBtn = $('monthNextBtn');
+  if (nextBtn) nextBtn.disabled = isCurrentMonth;
   $('mExpense').textContent = '¥' + expense.toFixed(2);
   $('mIncome').textContent = '¥' + income.toFixed(2);
   var bal = income - expense;
   $('mBalance').textContent = (bal >= 0 ? '+' : '-') + '¥' + Math.abs(bal).toFixed(2);
   $('mBalance').style.color = bal >= 0 ? 'var(--green)' : 'var(--red)';
   $('budgetText').textContent = '¥' + expense.toFixed(0) + ' / ¥' + state.budget;
-  var pct = Math.min(100, Math.round(expense / state.budget * 100));
+  var pct = state.budget > 0 ? Math.min(100, Math.round(expense / state.budget * 100)) : 0;
   var bar = $('budgetBar');
   bar.style.width = pct + '%';
   bar.className = 'budget-bar' + (pct >= 90 ? ' over' : '');
@@ -1820,10 +2365,10 @@ function renderFinance() {
 }
 function renderPieChart() {
   var container = $('pieChart');
-  var month = todayStr().slice(0, 7);
-  var monthExpenses = state.txns.filter(function(t) { return t.type === 'expense' && t.date.indexOf(month) === 0; });
+  var month = financeMonth;
+  var monthExpenses = state.txns.filter(function(t) { return t.type === 'expense' && t.date && t.date.indexOf(month) === 0; });
   if (monthExpenses.length === 0) {
-    container.innerHTML = '<div class="empty-tip">本月暂无支出记录</div>';
+    container.innerHTML = '<div class="empty-tip">该月暂无支出记录</div>';
     $('pieCaption').textContent = '';
     return;
   }
@@ -1855,21 +2400,33 @@ function renderPieChart() {
     legend += '<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 8px 2px 0"><span style="width:10px;height:10px;border-radius:3px;background:' + colors[i % colors.length] + ';display:inline-block"></span><span style="font-size:0.75rem;color:#A1A1A6">' + esc(e[0]) + ' ¥' + e[1].toFixed(0) + '</span></span>';
   });
   container.innerHTML = html + '<div style="text-align:center;margin-top:6px">' + legend + '</div>';
-  $('pieCaption').textContent = '本月支出分类占比';
+  $('pieCaption').textContent = monthText(month) + '支出分类占比';
 }
 function renderTxnList() {
   var list = $('txnList');
-  if (state.txns.length === 0) { list.innerHTML = '<div class="empty-tip">暂无流水记录</div>'; return; }
+  var month = financeMonth;
+  var monthTxns = state.txns.filter(function(t) { return t.date && t.date.indexOf(month) === 0; });
+  // 按日期倒序，同一天按录入顺序倒序
+  monthTxns.sort(function(a, b) {
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    return (b.id || 0) - (a.id || 0);
+  });
+  if (monthTxns.length === 0) { list.innerHTML = '<div class="empty-tip">该月暂无流水记录</div>'; return; }
   var catColors = { '餐饮': '#FF453A', '交通': '#0A84FF', '购物': '#FF9F0A', '学习': '#30D158', '健身': '#64D2FF', '副业收入': '#30D158', '其他': '#6E6E73' };
-  list.innerHTML = state.txns.slice(0, 30).map(function(t) {
+  var shown = monthTxns.slice(0, 200);
+  var html = shown.map(function(t) {
     var c = catColors[t.category] || catColors['其他'];
     return '<div class="row-item">'
       + '<div class="txn-icon" style="background:' + c + '22">' + svgIcon('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>', 17).replace('currentColor', c) + '</div>'
       + '<div class="row-info"><div class="row-title">' + esc(t.category) + '</div><div class="row-meta">' + t.date + (t.note ? ' · ' + esc(t.note) : '') + '</div></div>'
       + '<div class="txn-amount ' + t.type + '">' + (t.type === 'expense' ? '-' : '+') + '¥' + t.amount.toFixed(2) + '</div>'
+      + '<button class="edit-btn" onclick="openTxnEditor(' + t.id + ')" aria-label="编辑">' + svgIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>', 15) + '</button>'
       + '<button class="del-btn" onclick="deleteTransaction(' + t.id + ')" aria-label="删除">' + svgIcon('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>', 15) + '</button>'
       + '</div>';
-  }).join('') + (state.txns.length > 30 ? '<div class="empty-tip">仅展示最近 30 条，共 ' + state.txns.length + ' 条</div>' : '');
+  }).join('');
+  html += '<div class="empty-tip">' + monthText(month) + ' · 共 ' + monthTxns.length + ' 笔'
+    + (monthTxns.length > shown.length ? '（仅显示最近 ' + shown.length + ' 笔）' : '') + '</div>';
+  list.innerHTML = html;
 }
 
 /* ================= 健身 ================= */
@@ -1972,15 +2529,25 @@ function renderWeightChart() {
 /* ================= 菜谱 ================= */
 var recipeFilter = 'all';
 var detailRecipeId = null;
-function openRecipeEditor() {
-  $('recipeName').value = '';
-  $('recipeTime').value = '';
-  $('recipeKcal').value = '';
-  $('recipeIngredients').value = '';
-  $('recipeSteps').value = '';
+var editingRecipeId = null;
+function openRecipeEditor(id) {
+  var r = id ? state.recipes.find(function(x) { return x.id === id; }) : null;
+  editingRecipeId = r ? r.id : null;
+  $('recipeName').value = r ? r.name : '';
+  $('recipeMeal').value = r && r.meal ? r.meal : '午餐';
+  $('recipeTime').value = r && r.time ? r.time : '';
+  $('recipeKcal').value = r && r.kcal ? r.kcal : '';
+  $('recipeIngredients').value = r ? (r.ingredients || []).join('\n') : '';
+  $('recipeSteps').value = r ? (r.steps || []).join('\n') : '';
+  $('recipeModalTitle').textContent = r ? '编辑菜谱' : '加一道菜';
   $('recipeModal').classList.add('show');
 }
-function closeRecipeEditor() { $('recipeModal').classList.remove('show'); }
+function closeRecipeEditor() { $('recipeModal').classList.remove('show'); editingRecipeId = null; }
+function editDetailRecipe() {
+  var id = detailRecipeId;
+  closeRecipeDetail();
+  if (id) openRecipeEditor(id);
+}
 function saveRecipe() {
   var name = $('recipeName').value.trim();
   if (!name) return showToast('请输入菜名');
@@ -1988,18 +2555,33 @@ function saveRecipe() {
   var steps = $('recipeSteps').value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
   if (ingredients.length === 0) return showToast('至少写一条食材');
   if (steps.length === 0) return showToast('至少写一步做法');
-  state.recipes.unshift({
-    id: uid(), name: name,
-    meal: $('recipeMeal').value,
-    time: parseInt($('recipeTime').value, 10) || null,
-    kcal: parseInt($('recipeKcal').value, 10) || null,
-    ingredients: ingredients, steps: steps,
-    created: todayStr()
-  });
+  var timeVal = parseInt($('recipeTime').value, 10);
+  var kcalVal = parseInt($('recipeKcal').value, 10);
+  timeVal = (timeVal > 0 && timeVal <= 600) ? timeVal : null;
+  kcalVal = (kcalVal >= 0 && kcalVal <= 5000) ? kcalVal : null;
+  var old = editingRecipeId ? state.recipes.find(function(x) { return x.id === editingRecipeId; }) : null;
+  if (old) {
+    old.name = name;
+    old.meal = $('recipeMeal').value;
+    old.time = timeVal;
+    old.kcal = kcalVal;
+    old.ingredients = ingredients;
+    old.steps = steps;
+    old.updated = todayStr();
+  } else {
+    state.recipes.unshift({
+      id: uid(), name: name,
+      meal: $('recipeMeal').value,
+      time: timeVal,
+      kcal: kcalVal,
+      ingredients: ingredients, steps: steps,
+      created: todayStr()
+    });
+  }
   saveState();
   closeRecipeEditor();
   renderRecipes();
-  showToast('菜谱已收录');
+  showToast(old ? '菜谱已更新' : '菜谱已收录');
 }
 function openRecipeDetail(id) {
   var r = state.recipes.find(function(x) { return x.id === id; });
@@ -2044,6 +2626,595 @@ function renderRecipes() {
   }).join('');
 }
 
+/* ================= 专注番茄钟 ================= */
+var focusRun = { running: false, startTs: 0, accumMs: 0, timer: null };
+var FOCUS_RING_LEN = 552.9; // 圆环周长 2πr，r = 88
+
+function weekMonday(d) {
+  var r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  var wd = (r.getDay() + 6) % 7; // 周一记 0
+  r.setDate(r.getDate() - wd);
+  return r;
+}
+function focusTotalMs() { return (state.focusDuration || 25) * 60000; }
+function focusElapsedMs() {
+  return focusRun.accumMs + (focusRun.running ? Date.now() - focusRun.startTs : 0);
+}
+function focusRemainMs() { return Math.max(0, focusTotalMs() - focusElapsedMs()); }
+function fmtMMSS(ms) {
+  var total = Math.max(0, Math.ceil(ms / 1000));
+  return pad2(Math.floor(total / 60)) + ':' + pad2(total % 60);
+}
+function paintFocus() {
+  var timeEl = $('focusTime');
+  if (!timeEl) return;
+  var total = focusTotalMs();
+  var remain = focusRemainMs();
+  timeEl.textContent = fmtMMSS(remain);
+  var ratio = total > 0 ? remain / total : 0;
+  var ring = $('focusRing');
+  if (ring) ring.setAttribute('stroke-dashoffset', String(FOCUS_RING_LEN * (1 - ratio)));
+  var btn = $('focusMainBtn');
+  var st = $('focusState');
+  if (focusRun.running) {
+    btn.textContent = '暂停';
+    st.textContent = '专注中，先别看手机';
+  } else if (focusRun.accumMs > 0) {
+    btn.textContent = '继续';
+    st.textContent = '已暂停，随时接着来';
+  } else {
+    btn.textContent = '开始专注';
+    st.textContent = '准备好了就点开始';
+  }
+}
+function ensureFocusTimer() {
+  if (focusRun.timer) return;
+  focusRun.timer = setInterval(function() {
+    paintFocus();
+    if (focusRun.running && focusRemainMs() <= 0) completeFocus();
+  }, 500);
+}
+function stopFocusTimer() {
+  if (focusRun.timer) { clearInterval(focusRun.timer); focusRun.timer = null; }
+}
+function focusMainClick() {
+  if (focusRun.running) pauseFocus();
+  else startOrResumeFocus();
+}
+function startOrResumeFocus() {
+  if (focusRun.running) return;
+  focusRun.running = true;
+  focusRun.startTs = Date.now();
+  ensureFocusTimer();
+  paintFocus();
+}
+function pauseFocus() {
+  if (!focusRun.running) return;
+  focusRun.accumMs += Date.now() - focusRun.startTs;
+  focusRun.running = false;
+  stopFocusTimer();
+  paintFocus();
+  showToast('已暂停');
+}
+function addFocusSession(minutes) {
+  var m = Math.round(minutes);
+  if (!m || m < 1) return;
+  state.focusSessions.unshift({ id: uid(), date: todayStr(), minutes: m });
+  if (state.focusSessions.length > 1000) state.focusSessions = state.focusSessions.slice(0, 1000);
+  saveState();
+  renderFocus();
+}
+function completeFocus() {
+  var minutes = Math.round(focusTotalMs() / 60000);
+  focusRun.running = false;
+  focusRun.accumMs = 0;
+  stopFocusTimer();
+  addFocusSession(minutes);
+  paintFocus();
+  showToast('完成一段 ' + minutes + ' 分钟专注，休息一下');
+}
+function stopFocus() {
+  var elapsed = focusElapsedMs();
+  focusRun.running = false;
+  focusRun.accumMs = 0;
+  stopFocusTimer();
+  paintFocus();
+  if (elapsed >= 60000) {
+    var m = Math.round(elapsed / 60000);
+    addFocusSession(m);
+    showToast('已记录 ' + m + ' 分钟专注');
+  } else {
+    showToast('本次不足 1 分钟，不计入统计');
+  }
+}
+function saveFocusDuration() {
+  var v = parseInt($('focusDurationInput').value, 10);
+  if (!v || v < 1 || v > 180) return showToast('时长请填 1 到 180 分钟');
+  if (focusRun.running || focusRun.accumMs > 0) return showToast('请先结束当前这段专注');
+  state.focusDuration = v;
+  saveState();
+  renderFocus();
+  showToast('单次时长已设为 ' + v + ' 分钟');
+}
+function renderFocus() {
+  var input = $('focusDurationInput');
+  if (input) input.value = state.focusDuration;
+  var today = todayStr();
+  var weekStart = fmtDate(weekMonday(new Date()));
+  var todayMin = 0, weekMin = 0;
+  state.focusSessions.forEach(function(s) {
+    if (s.date === today) todayMin += s.minutes;
+    if (s.date >= weekStart && s.date <= today) weekMin += s.minutes;
+  });
+  $('focusToday').textContent = todayMin + ' 分钟';
+  $('focusWeek').textContent = weekMin + ' 分钟';
+  $('focusCount').textContent = state.focusSessions.length + ' 次';
+  var recent = state.focusSessions.slice(0, 5);
+  $('focusList').innerHTML = recent.length === 0
+    ? '<div class="empty-tip">还没有专注记录，开始第一段试试</div>'
+    : recent.map(function(s) {
+      return '<div class="row-item"><div class="row-info"><div class="row-title">专注 ' + s.minutes + ' 分钟</div>'
+        + '<div class="row-meta">' + esc(s.date) + '</div></div></div>';
+    }).join('');
+  paintFocus();
+}
+
+/* ================= 课表 ================= */
+var DEFAULT_SLOTS = [
+  { start: '08:00', end: '08:45' },
+  { start: '08:55', end: '09:40' },
+  { start: '10:00', end: '10:45' },
+  { start: '10:55', end: '11:40' },
+  { start: '14:30', end: '15:15' },
+  { start: '15:25', end: '16:10' },
+  { start: '16:30', end: '17:15' },
+  { start: '19:30', end: '20:15' }
+];
+var TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+function toMin(hhmm) {
+  var p = String(hhmm || '').split(':');
+  var h = parseInt(p[0], 10), m = parseInt(p[1], 10);
+  if (isNaN(h) || isNaN(m)) return -1;
+  return h * 60 + m;
+}
+function getWeekNo(d) {
+  var t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  var wd = (t.getDay() + 6) % 7;
+  t.setDate(t.getDate() - wd + 3); // 本周周四
+  var firstThu = new Date(t.getFullYear(), 0, 4);
+  var fwd = (firstThu.getDay() + 6) % 7;
+  firstThu.setDate(firstThu.getDate() - fwd + 3);
+  return 1 + Math.round((t - firstThu) / 604800000);
+}
+function applyDefaultSlots() {
+  state.timetable.slots = DEFAULT_SLOTS.map(function(s) { return { start: s.start, end: s.end }; });
+  state.timetable.courses = (state.timetable.courses || []).filter(function(c) { return c.slot < state.timetable.slots.length; });
+  saveState();
+  renderTimetable();
+  showToast('已生成 8 节默认节次，可逐条改时间');
+}
+function fillDefaultSlots() {
+  if (state.timetable.slots.length > 0) {
+    showConfirm('生成默认节次', '现有节次时间会被覆盖（课程内容保留，超出节次范围的课会被删除），确定吗？', applyDefaultSlots);
+  } else {
+    applyDefaultSlots();
+  }
+}
+function addSlot() {
+  var slots = state.timetable.slots;
+  if (slots.length >= 12) return showToast('节次最多 12 节');
+  var last = slots[slots.length - 1];
+  var start = last ? last.end : '08:00';
+  var startMin = toMin(start);
+  if (startMin < 0) startMin = 480;
+  var endMin = startMin + 45;
+  if (endMin > 23 * 60 + 59) return showToast('时间已排到深夜，先调整最后一节');
+  var toHHMM = function(m) { return pad2(Math.floor(m / 60)) + ':' + pad2(m % 60); };
+  slots.push({ start: toHHMM(startMin), end: toHHMM(endMin) });
+  saveState();
+  renderTimetable();
+}
+function updateSlot(idx, key, val) {
+  var s = state.timetable.slots[idx];
+  if (!s) return;
+  if (!TIME_RE.test(val)) { showToast('时间格式应为 HH:MM'); renderSlotList(); return; }
+  s[key] = val;
+  if (toMin(s.start) >= toMin(s.end)) {
+    showToast('开始时间要早于结束时间');
+    renderSlotList();
+    return;
+  }
+  saveState();
+  renderTimetable();
+}
+function deleteSlot(idx) {
+  var slots = state.timetable.slots;
+  if (slots.length <= 1) return showToast('至少保留一节');
+  var affected = state.timetable.courses.filter(function(c) { return c.slot === idx; }).length;
+  var msg = affected > 0 ? '这一节上有 ' + affected + ' 门课，删除节次会一并删掉这些课，确定吗？' : '确定删除第 ' + (idx + 1) + ' 节吗？';
+  showConfirm('删除节次', msg, function() {
+    slots.splice(idx, 1);
+    state.timetable.courses = state.timetable.courses.filter(function(c) { return c.slot !== idx; });
+    state.timetable.courses.forEach(function(c) { if (c.slot > idx) c.slot -= 1; });
+    saveState();
+    renderTimetable();
+    showToast('节次已删除');
+  });
+}
+var editingCourseId = null;
+function openCourseEditor(day, slotIdx, courseId) {
+  var slots = state.timetable.slots;
+  if (slots.length === 0) { showToast('请先点「生成默认节次」'); return; }
+  var c = courseId ? state.timetable.courses.find(function(x) { return x.id === courseId; }) : null;
+  editingCourseId = c ? c.id : null;
+  $('courseModalTitle').textContent = c ? '编辑课程' : '添加课程';
+  $('courseSlot').innerHTML = slots.map(function(s, i) {
+    return '<option value="' + i + '">第 ' + (i + 1) + ' 节 ' + esc(s.start) + '-' + esc(s.end) + '</option>';
+  }).join('');
+  $('courseName').value = c ? c.name : '';
+  $('courseDay').value = String(c ? c.day : (day >= 0 ? day : (new Date().getDay() + 6) % 7));
+  $('courseSlot').value = String(c ? c.slot : (slotIdx >= 0 ? slotIdx : 0));
+  $('courseRoom').value = c ? (c.room || '') : '';
+  $('courseWeek').value = c ? (c.week || 'all') : 'all';
+  var delBtn = $('courseDeleteBtn');
+  delBtn.style.display = c ? 'inline-flex' : 'none';
+  delBtn.onclick = function() {
+    if (!c) return;
+    showConfirm('删除课程', '「' + c.name + '」将从课表移除，确定吗？', function() {
+      state.timetable.courses = state.timetable.courses.filter(function(x) { return x.id !== c.id; });
+      saveState();
+      closeCourseEditor();
+      renderTimetable();
+      showToast('课程已删除');
+    });
+  };
+  $('courseModal').classList.add('show');
+}
+function closeCourseEditor() { $('courseModal').classList.remove('show'); editingCourseId = null; }
+function saveCourseEdit() {
+  var name = $('courseName').value.trim();
+  if (!name) return showToast('请填课程名');
+  var day = parseInt($('courseDay').value, 10);
+  var slot = parseInt($('courseSlot').value, 10);
+  if (isNaN(day) || day < 0 || day > 6) return showToast('星期不合法');
+  if (isNaN(slot) || slot < 0 || slot >= state.timetable.slots.length) return showToast('节次不合法');
+  var room = $('courseRoom').value.trim();
+  var week = $('courseWeek').value;
+  if (['all', 'odd', 'even'].indexOf(week) < 0) week = 'all';
+  var editing = editingCourseId ? state.timetable.courses.find(function(x) { return x.id === editingCourseId; }) : null;
+  // 同一格已有别的课：二次确认后替换
+  var conflict = state.timetable.courses.find(function(x) {
+    return x.day === day && x.slot === slot && (!editing || x.id !== editing.id);
+  });
+  var apply = function() {
+    if (conflict) state.timetable.courses = state.timetable.courses.filter(function(x) { return x.id !== conflict.id; });
+    if (editing) {
+      editing.name = name; editing.day = day; editing.slot = slot; editing.room = room; editing.week = week;
+    } else {
+      state.timetable.courses.push({ id: uid(), name: name, day: day, slot: slot, room: room, week: week });
+    }
+    saveState();
+    closeCourseEditor();
+    renderTimetable();
+    showToast('课程已保存');
+  };
+  if (conflict) showConfirm('这一格已有课', '「' + conflict.name + '」会被替换，确定吗？', apply);
+  else apply();
+}
+function renderSlotList() {
+  var box = $('slotList');
+  var slots = state.timetable.slots;
+  if (slots.length === 0) { box.innerHTML = '<div class="empty-tip">还没有节次</div>'; return; }
+  box.innerHTML = slots.map(function(s, i) {
+    return '<div class="row-item"><div class="row-info"><div class="row-title">第 ' + (i + 1) + ' 节</div></div>'
+      + '<div class="slot-row">'
+      + '<input type="time" value="' + esc(s.start) + '" onchange="updateSlot(' + i + ',\'start\',this.value)">'
+      + '<span style="color:var(--muted)">—</span>'
+      + '<input type="time" value="' + esc(s.end) + '" onchange="updateSlot(' + i + ',\'end\',this.value)">'
+      + '<button class="del-btn" onclick="deleteSlot(' + i + ')" aria-label="删除节次">' + svgIcon('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>', 15) + '</button>'
+      + '</div></div>';
+  }).join('') + '<button class="btn btn-ghost btn-sm" onclick="addSlot()" style="margin-top:8px">加一节</button>';
+}
+function renderTimetable() {
+  var grid = $('timetableGrid');
+  if (!grid) return;
+  var slots = state.timetable.slots;
+  var courses = state.timetable.courses;
+  if (slots.length === 0) {
+    grid.innerHTML = '<div class="empty-tip" style="grid-column:1/-1;min-width:260px">还没有节次，点右上角「生成默认节次」快速开始</div>';
+    $('ttTip').textContent = '';
+    renderSlotList();
+    return;
+  }
+  var now = new Date();
+  var todayIdx = (now.getDay() + 6) % 7;
+  var nowMin = now.getHours() * 60 + now.getMinutes();
+  var weekNo = getWeekNo(now);
+  var isOdd = weekNo % 2 === 1;
+  var days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  var html = '<div class="tt-head">时间</div>';
+  days.forEach(function(d, i) {
+    html += '<div class="tt-head' + (i === todayIdx ? ' today' : '') + '">' + d + '</div>';
+  });
+  slots.forEach(function(s, si) {
+    var st = toMin(s.start), en = toMin(s.end);
+    var nowRow = nowMin >= st && nowMin < en;
+    html += '<div class="tt-time' + (nowRow ? ' now' : '') + '"><span>第 ' + (si + 1) + ' 节</span><span>' + esc(s.start) + '-' + esc(s.end) + '</span></div>';
+    for (var d = 0; d < 7; d++) {
+      var c = null;
+      for (var k = 0; k < courses.length; k++) {
+        if (Number(courses[k].day) === d && Number(courses[k].slot) === si) { c = courses[k]; break; }
+      }
+      var cls = 'tt-cell' + (d === todayIdx ? ' today-col' : '') + (nowRow ? ' now-row' : '');
+      if (c) {
+        var active = c.week === 'all' || (c.week === 'odd' && isOdd) || (c.week === 'even' && !isOdd);
+        cls += ' has-course' + (active ? '' : ' inactive');
+        html += '<div class="' + cls + '" onclick="openCourseEditor(' + d + ',' + si + ',' + c.id + ')">'
+          + '<div class="tt-course-name">' + esc(c.name) + '</div>'
+          + (c.room ? '<div class="tt-course-room">' + esc(c.room) + '</div>' : '')
+          + (c.week !== 'all' ? '<div class="tt-course-week">' + (c.week === 'odd' ? '单周' : '双周') + ' · ' + esc(s.start) + '</div>' : '')
+          + '</div>';
+      } else {
+        html += '<div class="' + cls + '" onclick="openCourseEditor(' + d + ',' + si + ',0)"></div>';
+      }
+    }
+  });
+  grid.innerHTML = html;
+  $('ttTip').textContent = '第 ' + weekNo + ' 周（' + (isOdd ? '单周' : '双周') + '）· 今天 ' + days[todayIdx];
+  renderSlotList();
+}
+
+/* ================= 每周复盘 ================= */
+var reviewWeekStart = weekMonday(new Date());
+function shiftReviewWeek(n) {
+  var d = new Date(reviewWeekStart);
+  d.setDate(d.getDate() + n * 7);
+  var thisWeek = weekMonday(new Date());
+  if (d > thisWeek) return;
+  reviewWeekStart = d;
+  renderReview();
+}
+function renderReview() {
+  var start = reviewWeekStart;
+  var end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+  var s = fmtDate(start), e = fmtDate(end);
+  var inWeek = function(d) { return !!d && d >= s && d <= e; };
+  var isThisWeek = fmtDate(start) === fmtDate(weekMonday(new Date()));
+
+  // 完成任务：新数据看 completedAt，旧数据按截止日估算
+  var doneTasks = state.tasks.filter(function(t) {
+    if (!t.completed) return false;
+    return t.completedAt ? inWeek(t.completedAt) : inWeek(t.due);
+  });
+  var estimated = doneTasks.some(function(t) { return !t.completedAt; });
+
+  var habitSlots = state.habits.length * 7;
+  var checked = 0;
+  state.habits.forEach(function(h) {
+    (h.records || []).forEach(function(r) { if (inWeek(r)) checked++; });
+  });
+  var rate = habitSlots > 0 ? Math.round(checked / habitSlots * 100) : 0;
+
+  var expense = state.txns.filter(function(t) { return t.type === 'expense' && inWeek(t.date); })
+    .reduce(function(sum, t) { return sum + t.amount; }, 0);
+
+  var focusMin = state.focusSessions.filter(function(x) { return inWeek(x.date); })
+    .reduce(function(sum, x) { return sum + x.minutes; }, 0);
+
+  var newNotes = state.notes.filter(function(n) { return inWeek(n.created); }).length;
+
+  // 任务完成率 = 本周完成 /（本周完成 + 本周到期仍未完成）
+  var openDue = state.tasks.filter(function(t) { return !t.completed && inWeek(t.due); }).length;
+  var denom = doneTasks.length + openDue;
+  var doneRate = denom > 0 ? Math.round(doneTasks.length / denom * 100) : 0;
+
+  // 任务分类分布，找出重心
+  var catCount = {};
+  doneTasks.forEach(function(t) { catCount[t.category || '生活'] = (catCount[t.category || '生活'] || 0) + 1; });
+  var topCat = '';
+  var topNum = 0;
+  Object.keys(catCount).forEach(function(k) {
+    if (catCount[k] > topNum) { topNum = catCount[k]; topCat = k; }
+  });
+
+  $('reviewWeekLabel').textContent = s.slice(5) + ' ~ ' + e.slice(5) + (isThisWeek ? '（本周）' : '');
+  var nextBtn = $('reviewNextBtn');
+  if (nextBtn) nextBtn.disabled = isThisWeek;
+  $('rvTasks').textContent = doneTasks.length + ' 项';
+  $('rvHabits').textContent = rate + '%';
+  $('rvExpense').textContent = '¥' + expense.toFixed(2);
+  $('rvFocus').textContent = focusMin + ' 分钟';
+  $('rvNotes').textContent = newNotes + ' 条';
+  $('rvRate').textContent = doneRate + '%';
+
+  var lines = [];
+  lines.push(s + ' ~ ' + e + '（第 ' + getWeekNo(start) + ' 周）');
+  lines.push('');
+  lines.push('· 完成 ' + doneTasks.length + ' 项任务' + (denom > 0 ? '（完成率 ' + doneRate + '%）' : '') + (topCat ? '，重心在「' + topCat + '」' : '') + (estimated ? '，含按截止日估算的旧记录' : ''));
+  lines.push('· 习惯打卡率 ' + rate + '%' + (habitSlots > 0 ? '（' + checked + '/' + habitSlots + '）' : '（还没设置习惯）'));
+  lines.push('· 支出 ¥' + expense.toFixed(2) + '，专注 ' + focusMin + ' 分钟，新增笔记 ' + newNotes + ' 条');
+  lines.push('');
+  var tail;
+  if (doneTasks.length === 0 && focusMin === 0 && checked === 0) {
+    tail = '这一周几乎是空的。先从一件五分钟就能开始的小事起步，比计划一整套更管用。';
+  } else if (rate >= 70 && doneTasks.length >= 3) {
+    tail = '节奏不错，把现在这套固定下来就是复利。';
+  } else if (rate < 40) {
+    tail = '习惯掉得有点多，下周挑一件最容易的固定成固定动作，别一次加三件。';
+  } else {
+    tail = '完成度还行，挑一件最容易拖的事先干掉，下周会轻很多。';
+  }
+  lines.push('一句话：' + tail);
+  $('reviewText').textContent = lines.join('\n');
+}
+function copyReviewText() {
+  var text = $('reviewText').textContent || '';
+  if (!text) return showToast('暂无可复制的内容');
+  var fallback = function() {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    showToast(ok ? '小结已复制' : '复制失败，请长按文字手动复制');
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() { showToast('小结已复制'); }, fallback);
+  } else {
+    fallback();
+  }
+}
+
+/* ================= 今日天气（Open-Meteo，免费、无需密钥） ================= */
+var WEATHER_KEY = 'wt_weather_cache_v1';
+var WEATHER_TTL = 30 * 60 * 1000; // 30 分钟缓存
+var weatherBusy = false;
+
+function weatherLabel(code) {
+  if (code === 0) return '晴';
+  if (code === 1) return '大致晴朗';
+  if (code === 2) return '多云';
+  if (code === 3) return '阴';
+  if (code === 45 || code === 48) return '有雾';
+  if (code >= 51 && code <= 57) return '毛毛雨';
+  if (code >= 61 && code <= 67) return '下雨';
+  if (code >= 71 && code <= 77) return '下雪';
+  if (code >= 80 && code <= 82) return '阵雨';
+  if (code >= 85 && code <= 86) return '阵雪';
+  if (code >= 95) return '雷雨';
+  return '';
+}
+function readWeatherCache() {
+  try {
+    var raw = localStorage.getItem(WEATHER_KEY);
+    if (!raw) return null;
+    var c = JSON.parse(raw);
+    if (!c || typeof c.temp !== 'number' || !c.ts) return null;
+    return c;
+  } catch (e) { return null; }
+}
+function renderWeather() {
+  var el = $('heroWeather');
+  if (!el) return;
+  var city = (state && state.weatherCity) || '';
+  var hasCoord = state && typeof state.weatherLat === 'number' && typeof state.weatherLng === 'number';
+  if (!city && !hasCoord) {
+    el.innerHTML = '<span class="wx-city">天气</span><span>在设置里填城市后显示</span>';
+    return;
+  }
+  var c = readWeatherCache();
+  if (!c) {
+    el.innerHTML = '<span class="wx-city">' + esc(city || '本地') + '</span><span>天气加载中…</span>';
+    return;
+  }
+  var label = weatherLabel(c.code);
+  el.innerHTML = '<span class="wx-city">' + esc(c.city || city || '本地') + '</span>'
+    + (label ? '<span>' + esc(label) + '</span>' : '')
+    + '<span class="wx-temp">' + Math.round(c.temp) + '°C</span>';
+}
+function fetchWithTimeout(url, ms) {
+  return new Promise(function(resolve, reject) {
+    var done = false;
+    var timer = setTimeout(function() { if (!done) { done = true; reject(new Error('timeout')); } }, ms);
+    fetch(url, { cache: 'no-store' }).then(function(r) {
+      if (!r.ok) throw new Error('http');
+      return r.json();
+    }).then(function(j) {
+      if (done) return;
+      done = true; clearTimeout(timer); resolve(j);
+    }).catch(function(e) {
+      if (done) return;
+      done = true; clearTimeout(timer); reject(e);
+    });
+  });
+}
+// 常用城市内置坐标（中文地名在公共地名库里同名小镇很多，先查这张表最稳）
+var CITY_COORDS = {
+  '雅安': [29.985, 103.000], '温江': [30.682, 103.856], '成都': [30.667, 104.067],
+  '都江堰': [31.000, 103.620], '重庆': [29.563, 106.551], '北京': [39.904, 116.407],
+  '上海': [31.230, 121.474], '广州': [23.129, 113.264], '深圳': [22.543, 114.058],
+  '杭州': [30.274, 120.155], '南京': [32.060, 118.796], '武汉': [30.593, 114.305],
+  '西安': [34.341, 108.940], '天津': [39.084, 117.201], '长沙': [28.228, 112.939],
+  '郑州': [34.746, 113.625], '青岛': [36.067, 120.383], '昆明': [25.038, 102.718],
+  '贵阳': [26.647, 106.630], '兰州': [36.061, 103.834], '西宁': [36.617, 101.778],
+  '拉萨': [29.652, 91.172], '哈尔滨': [45.803, 126.535], '沈阳': [41.805, 123.431],
+  '合肥': [31.820, 117.227], '南昌': [28.682, 115.858], '福州': [26.074, 119.296],
+  '南宁': [22.817, 108.367], '海口': [20.044, 110.199], '太原': [37.870, 112.548],
+  '石家庄': [38.042, 114.515], '乌鲁木齐': [43.825, 87.617]
+};
+function geocodeCity(name) {
+  var key = String(name || '').trim();
+  if (CITY_COORDS[key]) {
+    return Promise.resolve({ lat: CITY_COORDS[key][0], lng: CITY_COORDS[key][1], name: key });
+  }
+  var url = 'https://geocoding-api.open-meteo.com/v1/search?count=10&language=zh&format=json&name=' + encodeURIComponent(key);
+  return fetchWithTimeout(url, 8000).then(function(j) {
+    var list = (j && j.results) || [];
+    if (!list.length) throw new Error('city not found');
+    // 同名小镇很多：优先国内、再按人口取最大的那个
+    var cn = list.filter(function(r) { return r.country_code === 'CN'; });
+    var pool = cn.length ? cn : list;
+    pool.sort(function(a, b) { return (b.population || 0) - (a.population || 0); });
+    var r = pool[0];
+    var label = r.name || key;
+    if (r.admin1 && label.indexOf(r.admin1) < 0) label = label + ' · ' + r.admin1;
+    return { lat: r.latitude, lng: r.longitude, name: label };
+  });
+}
+function fetchWeatherAt(lat, lng, cityName) {
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lng
+    + '&current=temperature_2m,weather_code&timezone=auto';
+  return fetchWithTimeout(url, 8000).then(function(j) {
+    if (!j || !j.current || typeof j.current.temperature_2m !== 'number') throw new Error('bad data');
+    var cache = {
+      ts: Date.now(),
+      temp: j.current.temperature_2m,
+      code: j.current.weather_code,
+      city: cityName || ''
+    };
+    try { localStorage.setItem(WEATHER_KEY, JSON.stringify(cache)); } catch (e) {}
+    renderWeather();
+  });
+}
+function refreshWeather() {
+  if (!state) return;
+  var hasCoord = typeof state.weatherLat === 'number' && typeof state.weatherLng === 'number';
+  if (!state.weatherCity && !hasCoord) { renderWeather(); return; }
+  var cached = readWeatherCache();
+  if (cached && Date.now() - cached.ts < WEATHER_TTL) { renderWeather(); return; }
+  if (weatherBusy) return;
+  weatherBusy = true;
+  var task = hasCoord
+    ? Promise.resolve({ lat: state.weatherLat, lng: state.weatherLng, name: state.weatherCity })
+    : geocodeCity(state.weatherCity);
+  task.then(function(loc) {
+    if (!loc || typeof loc.lat !== 'number' || typeof loc.lng !== 'number') throw new Error('bad loc');
+    // 第一次解析出的坐标存进 state，换设备同步过去不用再查
+    if (state.weatherLat !== loc.lat || state.weatherLng !== loc.lng) {
+      state.weatherLat = loc.lat;
+      state.weatherLng = loc.lng;
+      if (loc.name && !state.weatherCity) state.weatherCity = loc.name;
+      saveState();
+    }
+    return fetchWeatherAt(loc.lat, loc.lng, loc.name || state.weatherCity);
+  }).catch(function() {
+    var el = $('heroWeather');
+    if (!el) return;
+    var c = readWeatherCache();
+    if (c && typeof c.temp === 'number') {
+      el.innerHTML = '<span class="wx-city">' + esc(c.city || state.weatherCity || '本地') + '</span>'
+        + '<span class="wx-temp">' + Math.round(c.temp) + '°C</span>'
+        + '<span style="color:var(--muted)">（离线缓存）</span>';
+    } else {
+      el.innerHTML = '<span class="wx-city">天气</span><span style="color:var(--muted)">暂时取不到，稍后再试</span>';
+    }
+  }).then(function() { weatherBusy = false; });
+}
+
 /* ================= 备份 / 导入 / 清空 ================= */
 function exportJSON() {
   var data = { app: '小台一日游', version: 2, exportDate: new Date().toISOString() };
@@ -2066,13 +3237,22 @@ function importJSON(event) {
       if (!data || !Array.isArray(data.tasks)) throw new Error('格式不对');
       showConfirm('导入恢复', '将覆盖当前所有数据（任务 ' + (data.tasks || []).length + ' 条、习惯 ' + (data.habits || []).length + ' 个、笔记 ' + (data.notes || []).length + ' 条、流水 ' + (data.txns || []).length + ' 条），此操作不可撤销。', function() {
         var base = defaultState();
-        ['tasks', 'habits', 'weights', 'txns', 'bookmarks', 'notes', 'recipes'].forEach(function(k) {
+        // 白名单：只接收认识的字段，新增模块也要在这里登记，否则导入会丢数据
+        ['tasks', 'habits', 'weights', 'txns', 'bookmarks', 'notes', 'recipes', 'focusSessions'].forEach(function(k) {
           if (Array.isArray(data[k])) base[k] = data[k];
         });
+        if (data.timetable && typeof data.timetable === 'object') {
+          if (Array.isArray(data.timetable.slots)) base.timetable.slots = data.timetable.slots;
+          if (Array.isArray(data.timetable.courses)) base.timetable.courses = data.timetable.courses;
+        }
         if (typeof data.budget === 'number') base.budget = data.budget;
         if (typeof data.goalWeight === 'number') base.goalWeight = data.goalWeight;
+        if (typeof data.focusDuration === 'number') base.focusDuration = data.focusDuration;
+        if (typeof data.weatherCity === 'string') base.weatherCity = data.weatherCity;
+        if (typeof data.weatherLat === 'number') base.weatherLat = data.weatherLat;
+        if (typeof data.weatherLng === 'number') base.weatherLng = data.weatherLng;
         base.inited = true;
-        state = base;
+        state = normalizeState(base);
         saveState();
         renderAll();
         showToast('数据已恢复');
@@ -2169,7 +3349,8 @@ $('recipeFilters').addEventListener('click', function(e) {
   document.querySelectorAll('#recipeFilters .filter-chip').forEach(function(c) { c.classList.toggle('active', c === chip); });
   renderRecipes();
 });
-[['settingsModal', closeSettings], ['noteModal', closeNoteEditor], ['recipeModal', closeRecipeEditor], ['recipeDetailModal', closeRecipeDetail]].forEach(function(pair) {
+[['settingsModal', closeSettings], ['noteModal', closeNoteEditor], ['recipeModal', closeRecipeEditor], ['recipeDetailModal', closeRecipeDetail],
+ ['taskEditModal', closeTaskEditor], ['habitEditModal', closeHabitEditor], ['txnEditModal', closeTxnEditor], ['courseModal', closeCourseEditor]].forEach(function(pair) {
   $(pair[0]).addEventListener('click', function(e) { if (e.target === this) pair[1](); });
 });
 $('taskTitle').addEventListener('keydown', function(e) { if (e.key === 'Enter') addTask(); });
@@ -2179,19 +3360,47 @@ $('weightVal').addEventListener('keydown', function(e) { if (e.key === 'Enter') 
 $('bmUrl').addEventListener('keydown', function(e) { if (e.key === 'Enter') addBookmark(); });
 $('quickNote').addEventListener('keydown', function(e) { if (e.key === 'Enter') addQuickNote(); });
 
+/* ================= 跨天检测 ================= */
+var dayStamp = '';       // 上一次渲染时的日期，用来判断是否已经过夜
+var lastDefaultDay = ''; // 上一次自动写入输入框的默认日期
+function setDefaultDates(day) {
+  ['taskDue', 'weightDate', 'txnDate'].forEach(function(id) {
+    var el = $(id);
+    // 只在输入框为空、或还是上次自动填的值时才覆盖，避免吞掉用户手选的日期
+    if (el && (!el.value || el.value === lastDefaultDay)) el.value = day;
+  });
+  lastDefaultDay = day;
+}
+function checkDayRollover() {
+  var now = todayStr();
+  if (now === dayStamp) return;
+  dayStamp = now;
+  setDefaultDates(now);
+  renderAll();
+  if (typeof refreshWeather === 'function') refreshWeather();
+}
+
 /* ================= 初始化 ================= */
 function init() {
-  var today = todayStr();
-  $('taskDue').value = today;
-  $('weightDate').value = today;
-  $('txnDate').value = today;
-
   state = loadState();
   if (!state.inited) seedData();
 
+  dayStamp = todayStr();
+  setDefaultDates(dayStamp);
+
   buildNav();
-  switchTab('dashboard');
+  var hashTab = (location.hash || '').replace(/^#/, '');
+  switchTab(hashTab && $('tab-' + hashTab) ? hashTab : 'dashboard');
   renderAll();
+
+  // 三种时机检测跨天：切回页面、窗口获得焦点、前台挂机每分钟一次
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) { checkDayRollover(); paintFocus(); }
+  });
+  window.addEventListener('focus', function() { checkDayRollover(); paintFocus(); });
+  setInterval(checkDayRollover, 60000);
+
+  refreshWeather(); // 30 分钟内命中缓存不发请求
 
   if (syncCfgOk()) {
     setSyncStatus('syncing');
