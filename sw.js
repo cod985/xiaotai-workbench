@@ -1,4 +1,4 @@
-const CACHE = 'xiaotai-v3';
+const CACHE = 'xiaotai-v4';
 const ASSETS = ['./', './index.html', './icon.svg', './icon-180.png', './icon-192.png', './icon-512.png', './manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
@@ -17,6 +17,8 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  // 跨域接口（天气）不进缓存、也不兜底成 index.html，交给浏览器原生处理
+  if (new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(
     fetch(e.request)
       .then((resp) => {
